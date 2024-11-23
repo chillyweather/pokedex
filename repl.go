@@ -20,30 +20,25 @@ func runRepl() {
 			continue
 		}
 
-		command := normalizeInput(text)[0]
+		commandName := normalizeInput(text)[0]
 
-		switch command {
-		case "exit":
-			os.Exit(0)
-		case "help":
-			fmt.Println("")
-			fmt.Println("Welcome to the Pokedex!")
-			fmt.Println("")
-			fmt.Println("Usage:")
-			fmt.Println("")
-			fmt.Println("help: Displays a help message")
-			fmt.Println("exit: Exit the Pokedex")
-			fmt.Println("")
-		default:
-			fmt.Println("Invalid command")
+		availableCommands := getCommands()
+
+		command, ok := availableCommands[commandName]
+
+		if !ok {
+			fmt.Printf("Invalid command - %v", command)
+			continue
 		}
+
+		command.callback()
 	}
 }
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func()
 }
 
 func getCommands() map[string]cliCommand {
