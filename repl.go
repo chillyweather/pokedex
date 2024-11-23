@@ -27,18 +27,21 @@ func runRepl() {
 		command, ok := availableCommands[commandName]
 
 		if !ok {
-			fmt.Printf("Invalid command - %v", command)
+			fmt.Printf("Invalid command - %v\n", commandName)
 			continue
 		}
 
-		command.callback()
+		err := command.callback()
+		if err != nil {
+			fmt.Println(err)
+		}
 	}
 }
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func()
+	callback    func() error
 }
 
 func getCommands() map[string]cliCommand {
