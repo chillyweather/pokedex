@@ -2,11 +2,14 @@
 package cli
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/chillyweather/pokedexcli/internal/config"
 	"github.com/chillyweather/pokedexcli/internal/pokeapi"
+	"github.com/chillyweather/pokedexcli/internal/pokecache"
 )
 
 type Command struct {
@@ -40,16 +43,39 @@ func GetCommands() map[string]Command {
 	}
 }
 
+var cache = pokecache.NewCache(5 * time.Second)
+
 func commandMap(c *config.Config) error {
-	data, err := pokeapi.Fetch(c.Next)
-	if err != nil {
-		return err
+	var data pokeapi.LocationAreaResponse
+
+	cachedData, ok := cache.Get(c.Next)
+	if !ok {
+		// Fetch from API
+		fetchedData, err := pokeapi.Fetch(c.Next)
+		if err != nil {
+			return err
+		}
+		data = fetchedData
+
+		// Cache the JSON data
+		jsonData, err := json.Marshal(data)
+		if err != nil {
+			return err
+		}
+		cache.Add(c.Next, jsonData)
+	} else {
+		if err := json.Unmarshal(cachedData, &data); err != nil {
+			return err
+		}
 	}
+
 	c.Next = data.Next
 	c.Previous = data.Previous
+
 	for _, r := range data.Results {
 		fmt.Println(r.Name)
 	}
+
 	return nil
 }
 
@@ -58,15 +84,40 @@ func commandMapb(c *config.Config) error {
 		fmt.Println("you're on the first page")
 		return nil
 	}
-	data, err := pokeapi.Fetch(c.Previous)
-	if err != nil {
-		return err
+
+	var data pokeapi.LocationAreaResponse
+
+	cachedData, ok := cache.Get(c.Previous)
+	if !ok {
+		// Fetch from API
+		fetchedData, err := pokeapi.Fetch(c.Previous)
+		if err != nil {
+			return err
+		}
+		data = fetchedData
+
+		// Cache the JSON data
+		jsonData, err := json.Marshal(data)
+		if err != nil {
+			return err
+		}
+		cache.Add(c.Previous, jsonData)
+	} else {
+		// Unmarshal cached JSON data
+		if err := json.Unmarshal(cachedData, &data); err != nil {
+			return err
+		}
 	}
+
+	// Update config
 	c.Next = data.Next
 	c.Previous = data.Previous
+
+	// Print results
 	for _, r := range data.Results {
 		fmt.Println(r.Name)
 	}
+
 	return nil
 }
 
