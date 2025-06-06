@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"os"
 
-	"pokedex/internal/cli"
-	"pokedex/internal/config"
+	"github.com/chillyweather/pokedexcli/internal/cli"
+	"github.com/chillyweather/pokedexcli/internal/config"
 )
 
 func main() {

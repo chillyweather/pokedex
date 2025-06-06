@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"pokedex/internal/config"
-	"pokedex/internal/pokeapi"
+	"github.com/chillyweather/pokedexcli/internal/config"
+	"github.com/chillyweather/pokedexcli/internal/pokeapi"
 )
 
 type Command struct {
