@@ -40,17 +40,33 @@ func GetCommands() map[string]Command {
 			Description: "displays the previous 20 locations",
 			Callback:    commandMapb,
 		},
+		"explore": {
+			Name:        "explore",
+			Description: "displays pokemons in the area",
+			Callback:    commandExplore,
+		},
 	}
 }
 
 var cache = pokecache.NewCache(5 * time.Second)
+
+func commandExplore(c *config.Config) error {
+	location := "https://pokeapi.co/api/v2/location-area/" + c.CurrentArgs[0]
+	pokemons, err := pokeapi.FetchPokemons(location)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(pokemons)
+	return nil
+}
 
 func commandMap(c *config.Config) error {
 	var data pokeapi.LocationAreaResponse
 
 	cachedData, ok := cache.Get(c.Next)
 	if !ok {
-		fetchedData, err := pokeapi.Fetch(c.Next)
+		fetchedData, err := pokeapi.FetchLocations(c.Next)
 		if err != nil {
 			return err
 		}
@@ -87,7 +103,7 @@ func commandMapb(c *config.Config) error {
 
 	cachedData, ok := cache.Get(c.Previous)
 	if !ok {
-		fetchedData, err := pokeapi.Fetch(c.Previous)
+		fetchedData, err := pokeapi.FetchLocations(c.Previous)
 		if err != nil {
 			return err
 		}

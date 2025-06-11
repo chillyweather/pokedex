@@ -23,6 +23,12 @@ func main() {
 			if len(input) == 0 {
 				fmt.Println("Please enter a command")
 			} else if cmd, ok := commands[input[0]]; ok {
+				if len(input) > 1 {
+					cfg.CurrentArgs = input[1:]
+				} else {
+					cfg.CurrentArgs = []string{}
+				}
+
 				if err := cmd.Callback(cfg); err != nil {
 					fmt.Printf("Error: %v\n", err)
 				}
