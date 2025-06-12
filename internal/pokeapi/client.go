@@ -55,7 +55,8 @@ func FetchLocations(url string) (LocationAreaResponse, error) {
 	return data, nil
 }
 
-func FetchPokemons(url string) ([]Pokemon, error) {
+func FetchPokemons(location string) ([]Pokemon, error) {
+	url := "https://pokeapi.co/api/v2/location-area/" + location
 	result := []Pokemon{}
 	res, err := http.Get(url)
 	if err != nil {
@@ -73,7 +74,6 @@ func FetchPokemons(url string) ([]Pokemon, error) {
 	}
 
 	var data LocationArea
-	fmt.Println(body)
 	if err := json.Unmarshal(body, &data); err != nil {
 		return result, err
 	}
@@ -83,10 +83,12 @@ func FetchPokemons(url string) ([]Pokemon, error) {
 	}
 
 	if len(result) > 0 {
-		for key := range result {
-			fmt.Println(key)
+		fmt.Println("Exploring pastoria-city-area...")
+		fmt.Println("Found Pokemon:")
+		for _, val := range result {
+			fmt.Printf(" - %s\n", val.Name)
 		}
 	}
 
-	return result, nil
+	return nil, nil
 }

@@ -45,19 +45,22 @@ func GetCommands() map[string]Command {
 			Description: "displays pokemons in the area",
 			Callback:    commandExplore,
 		},
+		"catch": {
+			Name:        "catch",
+			Description: "making attempt to catch the choosen pokemon",
+			Callback:    commandExplore,
+		},
 	}
 }
 
 var cache = pokecache.NewCache(5 * time.Second)
 
 func commandExplore(c *config.Config) error {
-	location := "https://pokeapi.co/api/v2/location-area/" + c.CurrentArgs[0]
-	pokemons, err := pokeapi.FetchPokemons(location)
+	location := c.CurrentArgs[0]
+	_, err := pokeapi.FetchPokemons(location)
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(pokemons)
 	return nil
 }
 
