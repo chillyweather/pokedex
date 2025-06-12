@@ -31,6 +31,37 @@ type Pokemon struct {
 	URL  string `json:"url"`
 }
 
+type PokemonProperties struct {
+	BaseExperience int `json:"base_experience"`
+}
+
+func FetchBaseExperience(name string) (int, error) {
+	url := "https://pokeapi.co/api/v2/location-area/" + name
+
+	res, err := http.Get(url)
+	if err != nil {
+		return 0, err
+	}
+	defer res.Body.Close()
+
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return 0, err
+	}
+
+	if res.StatusCode > 299 {
+		return 0, fmt.Errorf("failed with status %d: %s", res.StatusCode, body)
+	}
+
+	var data PokemonProperties
+
+	if err := json.Unmarshal(body, &data); err != nil {
+		return 0, err
+	}
+
+	return data.BaseExperience, nil
+}
+
 func FetchLocations(url string) (LocationAreaResponse, error) {
 	res, err := http.Get(url)
 	if err != nil {
@@ -55,27 +86,27 @@ func FetchLocations(url string) (LocationAreaResponse, error) {
 	return data, nil
 }
 
-func FetchPokemons(location string) ([]Pokemon, error) {
+func FetchPokemons(location string) error {
 	url := "https://pokeapi.co/api/v2/location-area/" + location
 	result := []Pokemon{}
 	res, err := http.Get(url)
 	if err != nil {
-		return result, err
+		return err
 	}
 	defer res.Body.Close()
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return result, err
+		return err
 	}
 
 	if res.StatusCode > 299 {
-		return result, fmt.Errorf("failed with status %d: %s", res.StatusCode, body)
+		return fmt.Errorf("failed with status %d: %s", res.StatusCode, body)
 	}
 
 	var data LocationArea
 	if err := json.Unmarshal(body, &data); err != nil {
-		return result, err
+		return err
 	}
 
 	for _, encounter := range data.PokemonEncounters {
@@ -90,5 +121,5 @@ func FetchPokemons(location string) ([]Pokemon, error) {
 		}
 	}
 
-	return nil, nil
+	return nil
 }

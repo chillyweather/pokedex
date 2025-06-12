@@ -57,7 +57,7 @@ var cache = pokecache.NewCache(5 * time.Second)
 
 func commandExplore(c *config.Config) error {
 	location := c.CurrentArgs[0]
-	_, err := pokeapi.FetchPokemons(location)
+	err := pokeapi.FetchPokemons(location)
 	if err != nil {
 		return err
 	}
