@@ -4,6 +4,7 @@ package cli
 import (
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"os"
 	"time"
 
@@ -48,12 +49,23 @@ func GetCommands() map[string]Command {
 		"catch": {
 			Name:        "catch",
 			Description: "making attempt to catch the choosen pokemon",
-			Callback:    commandExplore,
+			Callback:    commandCatch,
 		},
 	}
 }
 
 var cache = pokecache.NewCache(5 * time.Second)
+
+func commandCatch(c *config.Config) error {
+	name := c.CurrentArgs[0]
+	exp, err := pokeapi.FetchBaseExperience(name)
+	if err != nil {
+		return err
+	}
+	chance := rand.Float64()
+	fmt.Printf("The %s have base experience of %d and your chance to catch it is %f \n", name, exp, chance)
+	return nil
+}
 
 func commandExplore(c *config.Config) error {
 	location := c.CurrentArgs[0]

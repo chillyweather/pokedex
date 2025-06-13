@@ -36,7 +36,7 @@ type PokemonProperties struct {
 }
 
 func FetchBaseExperience(name string) (int, error) {
-	url := "https://pokeapi.co/api/v2/location-area/" + name
+	url := "https://pokeapi.co/api/v2/pokemon/" + name
 
 	res, err := http.Get(url)
 	if err != nil {
