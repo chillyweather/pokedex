@@ -7,59 +7,31 @@ import (
 	"net/http"
 )
 
-type LocationAreaResponse struct {
-	Count    int    `json:"count"`
-	Next     string `json:"next"`
-	Previous string `json:"previous"`
-	Results  []struct {
-		Name string `json:"name"`
-		URL  string `json:"url"`
-	} `json:"results"`
-}
-
-type LocationArea struct {
-	Name              string             `json:"name"`
-	PokemonEncounters []PokemonEncounter `json:"pokemon_encounters"`
-}
-
-type PokemonEncounter struct {
-	Pokemon Pokemon `json:"pokemon"`
-}
-
-type Pokemon struct {
-	Name string `json:"name"`
-	URL  string `json:"url"`
-}
-
-type PokemonProperties struct {
-	BaseExperience int `json:"base_experience"`
-}
-
-func FetchBaseExperience(name string) (int, error) {
+func FetchBaseExperience(name string) (Pokemon, error) {
 	url := "https://pokeapi.co/api/v2/pokemon/" + name
 
 	res, err := http.Get(url)
 	if err != nil {
-		return 0, err
+		return Pokemon{}, err
 	}
 	defer res.Body.Close()
 
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		return 0, err
+		return Pokemon{}, err
 	}
 
 	if res.StatusCode > 299 {
-		return 0, fmt.Errorf("failed with status %d: %s", res.StatusCode, body)
+		return Pokemon{}, fmt.Errorf("failed with status %d: %s", res.StatusCode, body)
 	}
 
-	var data PokemonProperties
+	var data Pokemon
 
 	if err := json.Unmarshal(body, &data); err != nil {
-		return 0, err
+		return Pokemon{}, err
 	}
 
-	return data.BaseExperience, nil
+	return data, nil
 }
 
 func FetchLocations(url string) (LocationAreaResponse, error) {
@@ -88,7 +60,7 @@ func FetchLocations(url string) (LocationAreaResponse, error) {
 
 func FetchPokemons(location string) error {
 	url := "https://pokeapi.co/api/v2/location-area/" + location
-	result := []Pokemon{}
+	result := []PokemonBasicData{}
 	res, err := http.Get(url)
 	if err != nil {
 		return err
